@@ -3,13 +3,15 @@ using System;
 
 namespace LiveSplit.UI.Components
 {
-    class RE3RSRTFactory : IComponentFactory
+    public class RE3RSRTFactory : IComponentFactory
     {
         public string ComponentName => "RE3R SRT";
 
         public string Description => "A component to display SRT info for RE3R.";
 
-        public ComponentCategory Category => ComponentCategory.Timer;
+        public ComponentCategory Category => ComponentCategory.Other;
+        
+        public IComponent Create(LiveSplitState state) => new RE3RSRTComponent(state);
 
         public string UpdateName => ComponentName;
 
@@ -19,6 +21,5 @@ namespace LiveSplit.UI.Components
 
         public Version Version => Version.Parse("1.0");
 
-        public IComponent Create(LiveSplitState state) => new RE3RSRTComponent(state);
     }
 }

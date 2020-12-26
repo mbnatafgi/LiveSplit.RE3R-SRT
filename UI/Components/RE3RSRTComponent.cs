@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace LiveSplit.UI.Components
 {
-    class RE3RSRTComponent : IComponent
+    public class RE3RSRTComponent : IComponent
 
     {
         public RE3RSRTComponent(LiveSplitState state)
@@ -71,6 +71,8 @@ namespace LiveSplit.UI.Components
 
         public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
         {
+            this.state = state;
+
         }
 
         private LiveSplitState state;
@@ -79,6 +81,6 @@ namespace LiveSplit.UI.Components
         
         protected SimpleLabel RE3RSRTValueLabel = new SimpleLabel();
 
-        protected RE3RSRTSettings Settings { get; set; }
+        public RE3RSRTSettings Settings { get; set; }
     }
 }
