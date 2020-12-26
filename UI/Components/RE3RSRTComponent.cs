@@ -14,36 +14,76 @@ namespace LiveSplit.UI.Components
         {
             VerticalHeight = 10;
             this.state = state;
-            RE3RSRTNameLabel = new SimpleLabel();
-            RE3RSRTValueLabel = new SimpleLabel();
             Settings = new RE3RSRTSettings();
+            Cache = new GraphicsCache();
+            Grid = new Dictionary<string, Tuple<SimpleLabel, SimpleLabel>>();
+            Values = new Dictionary<string, string>();
+            Grid["DA"] = new Tuple<SimpleLabel, SimpleLabel>(new SimpleLabel(), new SimpleLabel());
+            Grid["HP"] = new Tuple<SimpleLabel, SimpleLabel>(new SimpleLabel(), new SimpleLabel());
+            Grid["Enemy"] = new Tuple<SimpleLabel, SimpleLabel>(new SimpleLabel(), new SimpleLabel());
+            Grid["Inventory"] = new Tuple<SimpleLabel, SimpleLabel>(new SimpleLabel(), new SimpleLabel());
         }
 
         public string ComponentName => "RE3R SRT";
 
         public float HorizontalWidth { get; set; }
 
+        public float VerticalHeight { get; set; }
+        
+        public float MinimumWidth { get; set; }
+        
         public float MinimumHeight { get; set; }
 
-        public float VerticalHeight { get; set; }
+        public float PaddingTop => 5;
 
-        public float MinimumWidth => RE3RSRTNameLabel.X + RE3RSRTValueLabel.ActualWidth;
+        public float PaddingBottom => 5;
 
-        public float PaddingTop { get; set; }
+        public float PaddingLeft => 5;
 
-        public float PaddingBottom { get; set; } 
+        public float PaddingRight => 5;
 
-        public float PaddingLeft { get { return 7f; } }
-
-        public float PaddingRight { get { return 7f; } }
-
-        public IDictionary<string, Action> ContextMenuControls
-        {
-            get { return null; }
-        }
+        public IDictionary<string, Action> ContextMenuControls => null;
 
         public void Dispose()
         {
+        }
+
+        private void DrawRow(Graphics g, LiveSplitState state, float width, float height, KeyValuePair<string, Tuple<SimpleLabel, SimpleLabel>> pair, float yOffset)
+        {
+            var nameLabel = pair.Value.Item1;
+            var valueLabel = pair.Value.Item2;
+
+            var name = pair.Key;
+            var value = Values.TryGetValue(pair.Key, out var val) ? val : "";
+            
+            var font = state.LayoutSettings.TextFont;
+            var textColor = state.LayoutSettings.TextColor;
+            var textOutlineColor = state.LayoutSettings.TextOutlineColor;
+
+            valueLabel.HorizontalAlignment = StringAlignment.Near;
+            nameLabel.Text = name + ":";
+            nameLabel.Font = font;
+            nameLabel.X = PaddingLeft;
+            nameLabel.Y = yOffset;
+            nameLabel.Width = width/2;
+            nameLabel.Height = g.MeasureString(name, font).Height;
+            nameLabel.Brush = new SolidBrush(textColor);
+            nameLabel.OutlineColor = textOutlineColor;
+            
+            nameLabel.Draw(g);
+            
+            valueLabel.HorizontalAlignment = StringAlignment.Far;
+            valueLabel.Text = value;
+            valueLabel.Font = font;
+            valueLabel.X = width/2;
+            valueLabel.Y = yOffset;
+            valueLabel.Width = width/2 - PaddingRight;
+            valueLabel.Height = g.MeasureString(value, font).Height;
+            valueLabel.Brush = new SolidBrush(textColor);
+            valueLabel.OutlineColor = textOutlineColor;
+            
+            valueLabel.Draw(g);
+
         }
 
         public void DrawHorizontal(Graphics g, LiveSplitState state, float height, Region clipRegion)
@@ -52,7 +92,15 @@ namespace LiveSplit.UI.Components
 
         public void DrawVertical(Graphics g, LiveSplitState state, float width, Region clipRegion)
         {
-        }
+            float yOffset = 0;
+            foreach (var pair in Grid)
+            {
+                DrawRow(g, state, width, VerticalHeight, pair, yOffset);
+                yOffset = Math.Max(
+                    pair.Value.Item1.Height + pair.Value.Item1.Y, 
+                    pair.Value.Item2.Height + pair.Value.Item2.Y);
+            }
+            VerticalHeight = 1.2f * yOffset;        }
 
         public XmlNode GetSettings(XmlDocument document)
         {
@@ -73,14 +121,27 @@ namespace LiveSplit.UI.Components
         {
             this.state = state;
 
+            var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+            if (now - Timestamp <= 100) return;
+            
+            RE3RSRT.UpdateValues(Values);
+            invalidator.Invalidate(0, 0, width, height);
+            Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
         }
 
         private LiveSplitState state;
 
-        protected SimpleLabel RE3RSRTNameLabel = new SimpleLabel();
-        
-        protected SimpleLabel RE3RSRTValueLabel = new SimpleLabel();
+        private Dictionary<string, Tuple<SimpleLabel, SimpleLabel>> Grid { get; set; }
 
         public RE3RSRTSettings Settings { get; set; }
+        
+        public GraphicsCache Cache { get; set; }
+        
+        public Dictionary<string, string> Values { get; set; }
+
+        private long Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
     }
 }
