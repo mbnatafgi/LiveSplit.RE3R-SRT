@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveSplit.RE3R-SRT", "LiveSplit.RE3R-SRT.csproj", "{84286D78-897C-47BB-BBD0-375D900DEA2C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveSplit.RE3RSRT", "LiveSplit.RE3RSRT.csproj", "{84286D78-897C-47BB-BBD0-375D900DEA2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{84286D78-897C-47BB-BBD0-375D900DEA2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{84286D78-897C-47BB-BBD0-375D900DEA2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{84286D78-897C-47BB-BBD0-375D900DEA2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{84286D78-897C-47BB-BBD0-375D900DEA2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
