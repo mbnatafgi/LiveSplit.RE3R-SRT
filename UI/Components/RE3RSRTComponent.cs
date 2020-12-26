@@ -92,7 +92,7 @@ namespace LiveSplit.UI.Components
 
         public void DrawVertical(Graphics g, LiveSplitState state, float width, Region clipRegion)
         {
-            float yOffset = 0;
+            float yOffset = PaddingTop;
             foreach (var pair in Grid)
             {
                 DrawRow(g, state, width, VerticalHeight, pair, yOffset);
@@ -100,7 +100,9 @@ namespace LiveSplit.UI.Components
                     pair.Value.Item1.Height + pair.Value.Item1.Y, 
                     pair.Value.Item2.Height + pair.Value.Item2.Y);
             }
-            VerticalHeight = 1.2f * yOffset;        }
+            VerticalHeight = yOffset + PaddingBottom;
+            
+        }
 
         public XmlNode GetSettings(XmlDocument document)
         {
