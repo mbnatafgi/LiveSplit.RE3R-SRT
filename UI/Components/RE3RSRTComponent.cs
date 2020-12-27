@@ -13,13 +13,12 @@ namespace LiveSplit.UI.Components
         public RE3RSRTComponent(LiveSplitState state)
         {
             VerticalHeight = 10;
-            this.state = state;
             Settings = new RE3RSRTSettings();
             Cache = new GraphicsCache();
             Grid = new Dictionary<string, Tuple<SimpleLabel, SimpleLabel>>();
             Values = new Dictionary<string, string>();
-            Grid["DA"] = new Tuple<SimpleLabel, SimpleLabel>(new SimpleLabel(), new SimpleLabel());
             Grid["HP"] = new Tuple<SimpleLabel, SimpleLabel>(new SimpleLabel(), new SimpleLabel());
+            Grid["DA"] = new Tuple<SimpleLabel, SimpleLabel>(new SimpleLabel(), new SimpleLabel());
             Grid["Enemy"] = new Tuple<SimpleLabel, SimpleLabel>(new SimpleLabel(), new SimpleLabel());
             Grid["Inventory"] = new Tuple<SimpleLabel, SimpleLabel>(new SimpleLabel(), new SimpleLabel());
         }
@@ -121,20 +120,21 @@ namespace LiveSplit.UI.Components
 
         public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
         {
-            this.state = state;
-
             var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
+            
             if (now - Timestamp <= 100) return;
             
-            RE3RSRT.UpdateValues(Values);
+            if (RE3RSRT.UpdateValues(Values))
+            {
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            }
+            else
+            {
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds() + 2000;
+            }
             invalidator.Invalidate(0, 0, width, height);
-            Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
         }
-
-        private LiveSplitState state;
-
+        
         private Dictionary<string, Tuple<SimpleLabel, SimpleLabel>> Grid { get; set; }
 
         public RE3RSRTSettings Settings { get; set; }
@@ -144,6 +144,7 @@ namespace LiveSplit.UI.Components
         public Dictionary<string, string> Values { get; set; }
 
         private long Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
+        
     }
+    
 }

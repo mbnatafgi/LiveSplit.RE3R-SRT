@@ -9,57 +9,101 @@ namespace LiveSplit.UI.Components
 {
     public class RE3RSRT
     {
-        public static void UpdateValues(Dictionary<string, string> Values)
+        private const string HOST = "http://localhost";
+
+        private const int PORT = 7190;
+        
+        private enum Mode
         {
-            var data = JSON.FromString(GetSRTData());
-            if (data != null)
+            Sync,
+            Async
+        }
+
+        private static Mode CurrentMode = Mode.Async;
+
+        public static bool UpdateValues(Dictionary<string, string> Values)
+        {
+            if (CurrentMode == Mode.Async)
             {
-                Values["DA"] = ((int)Math.Round((float)data.RankScore)).ToString();
-                Values["HP"] = data.PlayerCurrentHealth.ToString();
-                var enemy = ((IEnumerable) data.EnemyHealth).Cast<dynamic>()
-                    .Where(e => e.IsAlive)
-                    .OrderBy(e => (float)e.Percentage)
-                    .ThenByDescending(e => e.CurrentHP)
-                    .First();
+                ReconnectAsync();
+                Values.Clear();
+                return false;
+            }
+            UpdateValuesSync(Values);
+            return true;
+        }
 
-                var occupiedSlots = ((IEnumerable) data.PlayerInventory).Cast<dynamic>().Count(i => !i.IsEmptySlot);
-
-                Values["Inventory"] = string.Format("{0}/{1}", occupiedSlots, data.PlayerInventoryCount);
-
-                if (enemy != null)
+        private static void UpdateValuesSync(Dictionary<string, string> Values)
+        {
+            try
+            {
+                using (var wc = new WebClient())
                 {
-                    Values["Enemy"] = string.Format("{0}HP {1:P1}", enemy.CurrentHP, enemy.Percentage);
-                }
-                else
-                {
-                    Values["Enemy"] = "";
+                    var json = wc.DownloadString(new Uri(string.Format("{0}:{1}", HOST, PORT)));
+                    
+                    var data = JSON.FromString(json);
+                    
+                    var da = 0;
+                    var hp = 0;
+                    var inventory = "";
+                    var enemy = "";
+                
+                    if (data != null)
+                    {
+                        da = (int) Math.Round((float) data.RankScore);
+                        hp = data.PlayerCurrentHealth;
+
+                        var firstEnemy = ((IEnumerable)data.EnemyHealth).Cast<dynamic>()
+                            .Where(e => e["IsAlive"])
+                            .OrderBy(e => (float) e["Percentage"])
+                            .ThenByDescending(e => e["CurrentHP"])
+                            .FirstOrDefault();
+
+                        var occupiedSlots = ((IEnumerable)data.PlayerInventory).Cast<dynamic>()
+                            .Count(i => !i.IsEmptySlot);
+
+                        inventory = string.Format("{0}/{1}", occupiedSlots, data.PlayerInventoryCount);
+
+                        enemy = string.Format(
+                            "{0}HP {1:P1}",
+                            firstEnemy != null ? firstEnemy.CurrentHP : 0, 
+                            firstEnemy != null ? firstEnemy.Percentage : 0);
+                        
+                    }
+                    Values["DA"] = da.ToString();
+                    Values["HP"] = hp.ToString();
+                    Values["Enemy"] = enemy;
+                    Values["Inventory"] = inventory;
+                    
                 }
             }
-            else
+            catch
             {
-                Values["DA"] = "";
-                Values["HP"] = "";
-                Values["Enemy"] = "";
-                Values["Inventory"] = "";
+                CurrentMode = Mode.Async;
             }
         }
-        
-        private static string GetSRTData()
+
+
+        private static void ReconnectAsync()
         {
             using (var wc = new WebClient())
             {
-                try
-                {
-                    var json = wc.DownloadString(SRTURL);
-                    return json;
-                }
-                catch
-                {
-                    return "";
-                }
+                wc.DownloadStringCompleted += OnDownloadStringCompleted;
+                wc.DownloadStringAsync(new Uri(string.Format("{0}:{1}", HOST, PORT)));
             }
         }
-
-        private const string SRTURL = "http://localhost:7190";
+        
+        private static void OnDownloadStringCompleted(object sender, DownloadStringCompletedEventArgs args)
+        {
+            try
+            {
+                var json = args.Result;
+                CurrentMode = Mode.Sync;
+            }
+            catch
+            {
+            }
+        }
     }
+
 }
