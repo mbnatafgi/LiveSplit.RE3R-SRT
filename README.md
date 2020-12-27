@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a LiveSplit Component to integrate SRT with LiveSplit. 
+This is a LiveSplit Component to integrate [SRT](https://github.com/Squirrelies/RE3REmakeSRT) with [LiveSplit](https://github.com/LiveSplit/LiveSplit). 
 
 The goal is to "help" Speedrunners focus on the game and reduce eye movement by making DA, Health Points, and 
 other info from SRT closer to Timer and other Pace info from LiveSplit.
